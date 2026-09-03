@@ -1,95 +1,95 @@
-# Customer Escalation Triage — Agentic AI Capstone
+# Customer Escalation Triage — Agentic Workflow
 
-An AI-powered customer escalation triage workflow designed to reduce manual processing effort while maintaining human oversight, structured logging, routing controls, and measurable evaluation.
+An agentic customer escalation triage workflow that combines Zapier, Python, Slack, Gmail, and Zapier Tables to automate escalation intake, severity analysis, routing recommendations, human approval, and controlled customer communication.
 
 ## Project Overview
 
-Customer escalation handling often involves repetitive classification, severity assessment, routing, tracking, and response preparation.
+This project demonstrates a human-in-the-loop agentic workflow for handling customer escalations.
 
-This project demonstrates a hybrid automation approach where AI agents and workflow automation handle defined tasks while humans retain control over important decisions and exceptions.
+The workflow reduces repetitive manual triage work while maintaining human oversight before customer communication.
 
-## Business Impact
-
-| Metric | Baseline | Target | Improvement |
-|---|---:|---:|---:|
-| Processing time / escalation | ~15 min | <5 min | ~67% faster |
-| Analyst effort | ~25 hrs/week | ~10 hrs/week | ~60% reduction |
-| Classification | Manual | Automated | Reduced repetitive work |
-| Routing | Manual | Rule-based recommendation | More consistent |
-| Audit | Partial | Structured table state | Improved traceability |
-| Customer response | Manual | Approved automated workflow | Controlled execution |
-
-### Estimated Capacity Savings
-
-Approximately 15 analyst hours reclaimed per week.
-
-Approximately 780 hours of annual analyst capacity.
+The system uses three Zaps coordinated through Slack and Zapier Tables, with a Python-based escalation intelligence agent providing structured analysis.
 
 ## Architecture
 
-The workflow combines:
+### Zap 1 — Intake & Orchestration
 
-- Zapier automation
-- AI-powered classification
-- Severity assessment
-- Rule-based routing recommendations
-- Human-in-the-loop review
-- Python processing
-- Slack coordination
-- Structured workflow logging
-- Evaluation and regression testing
-- Controlled customer responses
+**Gmail → AI Extraction → Zapier Tables → Slack**
 
-## Workflow
+1. Receives a new customer email.
+2. Filters out sent messages.
+3. Uses AI to extract structured escalation information.
+4. Creates the escalation record in Zapier Tables.
+5. Posts a `NEW CUSTOMER ESCALATION` notification to Slack.
+6. Stores the Slack timestamp with the escalation record.
 
-Customer Escalation -> Orchestrator -> Classification -> Severity Assessment -> Routing Recommendation -> Human Review -> Response -> Audit Logging
+### Zap 2 — Severity, Routing & Approval
 
-## Key Design Principles
+**Slack → Table Lookup → Python Agent → Table Update → Slack Approval**
 
-### Human-in-the-Loop
+1. Detects a new escalation notification in Slack.
+2. Extracts the escalation ID.
+3. Retrieves the corresponding record from Zapier Tables.
+4. Sends the escalation information to the Python agent.
+5. Python analyzes severity, confidence, risk, routing, and review requirements.
+6. The results are written back to Zapier Tables.
+7. Slack requests human approval.
+8. The approval state is recorded for downstream control.
 
-Automation supports analysts rather than removing human control from important escalation decisions.
+### Python Escalation Intelligence Agent
 
-### Traceability
+The Python agent provides deterministic escalation analysis.
 
-Workflow state and decisions are logged to support auditability.
+It evaluates escalation information and produces structured results including:
 
-### Controlled Automation
+- Severity
+- Score
+- Confidence
+- Risk
+- Recommended routing
+- Human-review requirement
+- Approval requirement
+- Explanation
+- Audit information
 
-Automated customer responses require the appropriate workflow conditions and approval controls.
+### Zap 3 — Controlled Customer Reply
 
-### Evaluation
+**Slack `__REPLY__` → Approval Validation → Gmail → Table Update**
 
-The workflow includes test cases and regression checks to validate expected behavior.
+1. Detects an approved reply request.
+2. Extracts the escalation ID.
+3. Retrieves the escalation record.
+4. Validates the required approval state.
+5. Validates communication status to prevent duplicate sending.
+6. Removes the internal `__REPLY__` marker.
+7. Sends the controlled customer response through Gmail.
+8. Updates the escalation record with completion and communication status.
 
-## Repository Structure
+## End-to-End Flow
 
 ```text
-docs/
-  project-overview.md
-  workflow-architecture.md
-  business-value.md
-  governance-and-safety.md
-
-python-agent/
-  escalation_agent.py
-  requirements.txt
-  README.md
-
-zapier/
-  workflow-overview.md
-  orchestrator.md
-  severity-routing.md
-  reply-sender.md
-
-evaluation/
-  test-cases.md
-  regression-tests.md
-  results.md
-
-evidence/
-  screenshots/
-  diagrams/
-  presentation/
-
-sample-data/
+Customer Email
+      ↓
+   Zap 1
+      ↓
+AI Structured Extraction
+      ↓
+Zapier Tables
+      ↓
+     Slack
+      ↓
+   Zap 2
+      ↓
+Python Escalation Agent
+      ↓
+Severity / Risk / Routing
+      ↓
+Human Approval
+      ↓
+   Zap 3
+      ↓
+Approval Validation
+      ↓
+Customer Reply
+      ↓
+Zapier Tables Audit State
